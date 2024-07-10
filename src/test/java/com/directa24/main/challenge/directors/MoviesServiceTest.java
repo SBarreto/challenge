@@ -42,6 +42,17 @@ class MoviesServiceTest {
                 "Jane Doe",
                 "actor list"
         ));
+        movieList.add(new MovieDTO(
+                "title",
+                2014,
+                "R",
+                new Date(),
+                "2:30",
+                "Action",
+                "John Doe",
+                "Jane Doe",
+                "actor list"
+        ));
 
         when(moviesClient.consumeMoviesApi()).thenReturn(movieList);
 
