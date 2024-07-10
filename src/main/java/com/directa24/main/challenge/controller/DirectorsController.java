@@ -18,18 +18,19 @@ import org.springframework.web.bind.annotation.*;
         @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
 })
 @RequestMapping(value = "${api.context-path}", produces = MediaType.APPLICATION_JSON_VALUE)
-public class MoviesController {
+public class DirectorsController {
 
     private final MoviesService moviesService;
 
-    public MoviesController(MoviesService moviesService) {
+    public DirectorsController(MoviesService moviesService) {
         this.moviesService = moviesService;
     }
 
     @Operation(summary = "Gets movie directors that have directed an amount of movies equal or superior to threshold")
     @GetMapping("/api/directors")
-    public ResponseEntity<DirectorsResponse> getDirectorsForThreshold(@RequestParam(value = "threshold") int threshold) throws Exception {
+    public ResponseEntity<DirectorsResponse> getDirectorsForThreshold(@RequestParam(value = "threshold") int threshold) {
         return ResponseEntity.ok(new DirectorsResponse(
+                threshold,
                 moviesService.getDirectorsFromThreshold(threshold)
         ));
 
