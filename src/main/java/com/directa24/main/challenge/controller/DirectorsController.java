@@ -3,7 +3,9 @@ package com.directa24.main.challenge.controller;
 import com.directa24.main.challenge.dto.DirectorsResponseDTO;
 import com.directa24.main.challenge.service.MoviesService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -36,7 +38,8 @@ public class DirectorsController {
     @Operation(summary = "Gets movie directors that have directed an amount of movies equal or superior to threshold")
     @GetMapping("/api/directors")
     @Valid
-    public ResponseEntity<DirectorsResponseDTO> getDirectorsForThreshold(@RequestParam @Pattern(regexp = "^[1-9]\\d*$", message = "Only numbers from 1 to 9 are accepted") String threshold) {
+    @Parameter(name = "threshold", description = "Exclusive lower limit for number of movies made by any director, must be a number from 1 to 100", required = true, schema = @Schema(type = "integer", format = "int32", example = "5"))
+    public ResponseEntity<DirectorsResponseDTO> getDirectorsForThreshold(@RequestParam @Pattern(regexp = "^[1-9][0-9]?$|^100$", message = "Only numbers from 1 to 100 are accepted") String threshold) {
         int thresholdInt = Integer.parseInt(threshold);
         return ResponseEntity.ok(new DirectorsResponseDTO(
                 thresholdInt,
