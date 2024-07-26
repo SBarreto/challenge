@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Success retrieving movies and directors for threshold"),
         @ApiResponse(responseCode = "400", description = "Bad request, tried to send invalidad threshold parameter", content = @Content),
-        @ApiResponse(responseCode = "404", description = "Path Not Found"),
+        @ApiResponse(responseCode = "404", description = "Path Not Found", content = @Content),
         @ApiResponse(responseCode = "500", description = "Internal server error, there was an issue contacting external movies API or processing data", content = @Content)
 })
 @RequestMapping(value = "${api.context-path}", produces = MediaType.APPLICATION_JSON_VALUE)
