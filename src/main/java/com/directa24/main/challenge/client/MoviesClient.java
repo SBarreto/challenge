@@ -1,18 +1,18 @@
 package com.directa24.main.challenge.client;
 
-import com.directa24.main.challenge.dto.MovieDTO;
-import com.directa24.main.challenge.dto.MoviesResponse;
-import com.directa24.main.challenge.exception.MovieClientApiException;
+import com.directa24.main.challenge.dto.MoviesResponseDTO;
+import com.directa24.main.challenge.exception.MovieProviderUnavailableException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.io.IOException;
 
 @Service
 public class MoviesClient {
@@ -20,31 +20,27 @@ public class MoviesClient {
     @Value("${movies.service.baseurl}")
     private String moviesServiceBaseUrl;
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
-    public List<MovieDTO> consumeMoviesApi() {
+    public MoviesClient(RestTemplate restTemplate, ObjectMapper objectMapper) {
+        this.restTemplate = restTemplate;
+        this.objectMapper = objectMapper;
+    }
+
+
+    @Retryable(maxAttempts = 5, backoff = @Backoff(delay = 1000))
+    public MoviesResponseDTO callMoviesApi(int param) throws IOException {
         String uri = UriComponentsBuilder.fromUriString(moviesServiceBaseUrl + "/api/movies/search")
-                .queryParam("page", 1)
+                .queryParam("page", param)
                 .toUriString();
+        ResponseEntity<byte[]> response = restTemplate.getForEntity(uri, byte[].class);
+        return objectMapper.readValue(response.getBody(), MoviesResponseDTO.class);
+    }
 
-        int pageTotal;
-        List<MovieDTO> moviesToProcess = new ArrayList<>();
-        try {
-            ResponseEntity<byte[]> response = restTemplate.getForEntity(uri, byte[].class);
-            pageTotal = objectMapper.readValue(response.getBody(), MoviesResponse.class).totalPages();
-            for (int i = 1; i <= pageTotal; i++) {
-                uri = UriComponentsBuilder.fromUriString(moviesServiceBaseUrl + "/api/movies/search")
-                        .queryParam("page", i)
-                        .toUriString();
-                response = restTemplate.getForEntity(uri, byte[].class);
-                MovieDTO[] movies = objectMapper.readValue(response.getBody(), MoviesResponse.class).data();
-                moviesToProcess.addAll(Arrays.stream(movies).toList());
-            }
-        } catch (Exception e) {
-            throw new MovieClientApiException("There was an error trying to fetch movies from api");
-        }
-        return moviesToProcess;
+    @Recover
+    public MoviesResponseDTO recover (Throwable t) {
+        throw new MovieProviderUnavailableException("Movies api is unresponsive or unavailable");
     }
 }

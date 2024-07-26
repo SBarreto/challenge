@@ -1,7 +1,7 @@
 package com.directa24.main.challenge.directors;
 
 import com.directa24.main.challenge.controller.DirectorsController;
-import com.directa24.main.challenge.dto.DirectorsResponse;
+import com.directa24.main.challenge.dto.DirectorsResponseDTO;
 import com.directa24.main.challenge.service.MoviesService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,18 +30,16 @@ class DirectorsControllerTest {
 
 
     @Test
-    void testGetDirectorsWithThreshold() {
+    void testGetDirectorsWithThreshold_returnsOk() {
         List<String> mockDirectors = new ArrayList<>();
         mockDirectors.add("John Doe");
 
         when(moviesService.getDirectorsFromThreshold(4)).thenReturn(mockDirectors);
 
-        ResponseEntity<DirectorsResponse> responseResponseEntity = directorsController.getDirectorsForThreshold(4);
+        ResponseEntity<DirectorsResponseDTO> responseResponseEntity = directorsController.getDirectorsForThreshold("4");
 
         assertThat(responseResponseEntity, notNullValue());
         assertThat(responseResponseEntity.getStatusCode(), equalTo(HttpStatus.OK));
-
     }
-
 
 }

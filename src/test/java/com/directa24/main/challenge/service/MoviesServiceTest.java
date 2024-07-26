@@ -1,14 +1,16 @@
-package com.directa24.main.challenge.directors;
+package com.directa24.main.challenge.service;
 
 import com.directa24.main.challenge.client.MoviesClient;
 import com.directa24.main.challenge.dto.MovieDTO;
-import com.directa24.main.challenge.service.MoviesService;
+import com.directa24.main.challenge.dto.MoviesResponseDTO;
+import com.directa24.main.challenge.enums.Rating;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -16,6 +18,7 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -28,13 +31,13 @@ class MoviesServiceTest {
     private MoviesService moviesService;
 
     @Test
-    void testGetDirectorsFromThreshold() {
+    void testGetDirectorsFromThreshold() throws IOException {
 
         List<MovieDTO> movieList = new ArrayList<>();
         movieList.add(new MovieDTO(
                 "title",
                 2014,
-                "R",
+                Rating.R,
                 new Date(),
                 "2:30",
                 "Action",
@@ -45,7 +48,7 @@ class MoviesServiceTest {
         movieList.add(new MovieDTO(
                 "title",
                 2014,
-                "R",
+                Rating.R,
                 new Date(),
                 "2:30",
                 "Action",
@@ -53,8 +56,15 @@ class MoviesServiceTest {
                 "Jane Doe",
                 "actor list"
         ));
+        MoviesResponseDTO moviesResponse = new MoviesResponseDTO(
+                1,
+                2,
+                4,
+                1,
+                movieList.toArray(new MovieDTO[0])
+        );
 
-        when(moviesClient.consumeMoviesApi()).thenReturn(movieList);
+        when(moviesClient.callMoviesApi(anyInt())).thenReturn(moviesResponse);
 
         List<String> directors = moviesService.getDirectorsFromThreshold(1);
 

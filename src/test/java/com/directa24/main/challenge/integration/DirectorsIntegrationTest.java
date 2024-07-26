@@ -30,7 +30,7 @@ class DirectorsIntegrationTest {
 
     @BeforeEach
     void setup() {
-
+        WireMock.reset();
     }
 
     @Test
@@ -55,11 +55,18 @@ class DirectorsIntegrationTest {
         WireMock.stubFor(WireMock.get(urlPathMatching("/api/movies/search"))
                 .withQueryParam("page", WireMock.matching("(10|[0-9])"))
                 .willReturn(aResponse()
+                        .withBody("There was an error trying to fetch movies from api")
                         .withStatus(500)));
         mockMvc.perform(MockMvcRequestBuilders.get("/directa24/challenge/api/directors")
                         .param("threshold", "4"))
-                .andExpect(status().is5xxServerError())
-                .andReturn();
+                .andExpect(status().isInternalServerError());
+    }
 
+    @Test
+    @DisplayName("Consume movies service and return 400 bad request when a bad parameter is received in request")
+    void get_directors_returns400_for_bad_request() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/directa24/challenge/api/directors")
+                        .param("threshold", "hey"))
+                .andExpect(status().isBadRequest());
     }
 }
